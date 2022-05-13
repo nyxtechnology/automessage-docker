@@ -3,7 +3,10 @@
 /public/storage
 /storage/*.key
 /storage/rabbitmq
-docker/
+docker/scripts
+docker/templates
+docker/Dockerfile.save
+docker/Dockerfile.save.1
 certs/
 /vendor
 /.idea
