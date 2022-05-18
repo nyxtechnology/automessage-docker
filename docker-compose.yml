@@ -26,3 +26,15 @@ services:
       DB_USERNAME: test
       DB_PASSWORD: test
       DB_ROOT_PASSWORD: password
+
+  rabbitmq:
+    image: rabbitmq:latest
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_LOGIN: nyxRabbitmq
+      RABBITMQ_PASSWORD: ijenxhSOSLEJ592F
+      RABBITMQ_EXCHANGE_NAME: Automessage
+      RABBITMQ_QUEUE: events
+      RABBITMQ_EXCHANGE_ARGUMENTS: null
+      RABBITMQ_QUEUE_ARGUMENTS: null
