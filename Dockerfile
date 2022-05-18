@@ -6,8 +6,7 @@ RUN install unzip; \
 RUN set -ex; \
     curl -fsSL -o automessage-stage.zip $URL; \
     unzip automessage-stage.zip; \
-    rm -r automessage-stage.zip; \
-    ls -la /
+    rm -r automessage-stage.zip \
 
 FROM composer:2.3 AS composerBuilder
 COPY --from=automessageDownloader /automessage-stage/composer.lock /app/composer.lock
@@ -24,8 +23,6 @@ FROM php:8.1-apache
 COPY --chown=www-data:www-data --from=composerBuilder /app/vendor /var/www/html/automessage/vendor
 COPY --from=automessageDownloader /automessage-stage/ /var/www/html/automessage
 COPY ./.env.example /var/www/html/automessage/.env
-RUN set -ex; \
-    ls -la /var/www/html/automessage
 
 ENV APACHE_DOCUMENT_ROOT /var/www/html/automessage/public
 
