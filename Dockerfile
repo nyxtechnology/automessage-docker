@@ -1,6 +1,17 @@
+FROM php:8.1-alpine as automessageDownloader
+ENV VERSION 0.5
+ENV URL https://github.com/nyxtechnology/automessage/archive/refs/heads/stage.zip
+
+RUN install unzip; \
+RUN set -ex; \
+    curl -fsSL -o automessage-stage.zip $URL; \
+    unzip automessage-stage.zip; \
+    rm -r automessage-stage.zip; \
+    ls -la /
+
 FROM composer:2.3 AS composerBuilder
-COPY composer.lock composer.lock
-COPY composer.json composer.json
+COPY --from=automessageDownloader /automessage-stage/composer.lock /app/composer.lock
+COPY --from=automessageDownloader /automessage-stage/composer.json /app/composer.json
 
 RUN composer install \
     --ignore-platform-reqs \
@@ -10,7 +21,13 @@ RUN composer install \
     --no-dev
 
 FROM php:8.1-apache
-ENV APACHE_DOCUMENT_ROOT /var/www/html/automessage-stage/public
+COPY --chown=www-data:www-data --from=composerBuilder /app/vendor /var/www/html/automessage/vendor
+COPY --from=automessageDownloader /automessage-stage/ /var/www/html/automessage
+COPY ./.env.example /var/www/html/automessage/.env
+RUN set -ex; \
+    ls -la /var/www/html/automessage
+
+ENV APACHE_DOCUMENT_ROOT /var/www/html/automessage/public
 
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
@@ -64,10 +81,6 @@ RUN set -ex; \
         echo 'upload_max_filesize=${UPLOAD_LIMIT}'; \
     } > $PHP_INI_DIR/conf.d/phpmyadmin-misc.ini
 
-# Calculate download URL
-ENV VERSION 0.5
-ENV URL https://github.com/nyxtechnology/automessage/archive/refs/heads/stage.zip
-
 LABEL org.opencontainers.image.title="Official Automessage Docker image" \
     org.opencontainers.image.description="Run automessage with Alpine, Apache and PHP FPM." \
     org.opencontainers.image.authors="The automessage Team <admin@nyc.tc>" \
@@ -78,26 +91,13 @@ LABEL org.opencontainers.image.title="Official Automessage Docker image" \
     org.opencontainers.image.url="https://github.com/nyxtechnology/automessage" \
     org.opencontainers.image.source="https://github.com/nyxtechnology/automessage"
 
-# Download automessage zip, verify it using gpg and extract
 RUN set -ex; \
     apt-get update; \
     apt-get install -y apt-utils; \
     apt-get install -y --no-install-recommends \
         gnupg \
-        dirmngr \
-	    unzip \
-    ; \
-    \
-    curl -fsSL -o automessage-stage.zip $URL; \
-    unzip automessage-stage.zip; \
-    rm -r automessage-stage.zip
+        dirmngr
 
 RUN chown www-data:www-data . -R
-COPY --chown=www-data:www-data --from=composerBuilder /app/vendor /var/www/html/automessage-stage/vendor
-COPY --chown=www-data:www-data /.env.example /var/www/html/automessage-stage/.env
-COPY --chown=www-data:www-data /.env.example /var/www/html/automessage-stage/docker/php-apache/.env
-
-RUN set -ex; \
-    ls -la /var/www/html/automessage-stage
 
 CMD ["apache2-foreground"]
