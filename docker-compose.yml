@@ -10,8 +10,19 @@ services:
       MYSQL_ROOT_PASSWORD: test
 
   automessage:
-    image: automessage
+    image: nyxtechnology/automessage
     ports:
       - 80:80
-    volumes:
-      - .env:/var/www/html/automessage-stage/.env
+    environment:
+      APP_NAME: Laravel
+      APP_ENV: local
+      APP_KEY: base64:dG/v+Dc73X/5wB4kKn/gjuaJucxR+TMrcTFuygOdWCQ=
+      APP_URL: http://localhost
+      PROJECT_NAME: automessage
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: myDb
+      DB_USERNAME: test
+      DB_PASSWORD: test
+      DB_ROOT_PASSWORD: password
