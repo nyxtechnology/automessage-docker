@@ -6,7 +6,7 @@ RUN install unzip; \
 RUN set -ex; \
     curl -fsSL -o automessage-stage.zip $URL; \
     unzip automessage-stage.zip; \
-    rm -r automessage-stage.zip \
+    rm -r automessage-stage.zip 
 
 FROM composer:2.3 AS composerBuilder
 COPY --from=automessageDownloader /automessage-stage/composer.lock /app/composer.lock
