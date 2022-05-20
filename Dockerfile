@@ -1,8 +1,10 @@
+
 FROM php:8.1-alpine as automessageDownloader
 ENV VERSION 0.5
 ENV URL https://github.com/nyxtechnology/automessage/archive/refs/heads/stage.zip
 
 RUN install unzip; \
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer; \
 RUN set -ex; \
     curl -fsSL -o automessage-stage.zip $URL; \
     unzip automessage-stage.zip; \
@@ -16,8 +18,7 @@ RUN composer install \
     --ignore-platform-reqs \
     --no-interaction \
     --no-scripts \
-    --prefer-dist \
-    --no-dev
+    --prefer-dist 
 
 FROM php:8.1-apache
 COPY --chown=www-data:www-data --from=composerBuilder /app/vendor /var/www/html/automessage/vendor
@@ -48,6 +49,8 @@ RUN set -ex; \
         gd \
         mysqli \
         opcache \
+	    pdo \
+	    pdo_mysql \
     ;
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
@@ -93,7 +96,8 @@ RUN set -ex; \
     apt-get install -y apt-utils; \
     apt-get install -y --no-install-recommends \
         gnupg \
-        dirmngr
+        dirmngr \
+        nano
 
 RUN chown www-data:www-data . -R
 
