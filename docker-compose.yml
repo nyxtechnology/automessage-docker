@@ -38,3 +38,10 @@ services:
       RABBITMQ_QUEUE: events
       RABBITMQ_EXCHANGE_ARGUMENTS: null
       RABBITMQ_QUEUE_ARGUMENTS: null
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: always
+    ports:
+      - 1025:1025
+      - 8025:8025
